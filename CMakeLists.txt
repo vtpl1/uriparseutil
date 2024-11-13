@@ -13,6 +13,8 @@ project(uriparseutil
 set(COMPONENT1 uriparseutil)
 
 find_package(Poco REQUIRED Foundation)
+find_package(absl REQUIRED)
+find_package(fmt REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
@@ -63,6 +65,8 @@ add_executable(tests
 
 target_link_libraries(tests
 	PRIVATE uriparseutil
+	PRIVATE absl::strings
+	PRIVATE fmt::fmt
 )
 
 include(GenerateExportHeader)

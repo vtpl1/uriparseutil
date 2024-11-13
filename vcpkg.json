@@ -5,6 +5,7 @@
   "homepage": "http://github.com/uriparseutil",
   "dependencies": [
     "abseil",
-    "poco"
+    "poco",
+    "fmt"
   ]
 }

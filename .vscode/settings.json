@@ -72,6 +72,16 @@
         "print": "cpp",
         "queue": "cpp",
         "span": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "__tree": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "charconv": "cpp",
+        "forward_list": "cpp",
+        "sstream": "cpp",
+        "iostream": "cpp"
     },
 }
