@@ -16,7 +16,7 @@ namespace {
 Channel parseChannel(const std::string& str, const char delim) {
   Channel channel;
 
-  std::vector<std::string> fragments = absl::StrSplit(str, delim, absl::SkipWhitespace());
+  const std::vector<std::string> fragments = absl::StrSplit(str, delim, absl::SkipWhitespace());
   for (auto&& elem : fragments) {
     std::vector<std::string> parts = absl::StrSplit(elem, '=');
     if (parts.size() == 2) {
@@ -56,11 +56,11 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
   UriDetails uri_details;
 
   const Poco::URI uri_p(uri);
-  std::cout << uri << "\n";
+  // std::cout << uri << "\n";
 
-  std::cout << "scheme:[" << uri_p.getScheme() << "], authority:[" << uri_p.getAuthority() << "], path:["
-            << uri_p.getPath() << "], path_query:[" << uri_p.getPathAndQuery() << "], path_etc:[" << uri_p.getPathEtc()
-            << "], query:[" << uri_p.getQuery() << "], fragment:[" << uri_p.getFragment() << "]\n";
+  // std::cout << "scheme:[" << uri_p.getScheme() << "], authority:[" << uri_p.getAuthority() << "], path:["
+  //           << uri_p.getPath() << "], path_query:[" << uri_p.getPathAndQuery() << "], path_etc:[" << uri_p.getPathEtc()
+  //           << "], query:[" << uri_p.getQuery() << "], fragment:[" << uri_p.getFragment() << "]\n";
 
   if (uri_p.getScheme().empty()) {
     const Poco::Path path_p(uri);

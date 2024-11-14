@@ -18,9 +18,9 @@ find_package(fmt REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
-	clang-tidy-19;)
+	clang-tidy-18;)
 set(CMAKE_C_CLANG_TIDY
-	clang-tidy-19;)
+	clang-tidy-18;)
 endif()
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
