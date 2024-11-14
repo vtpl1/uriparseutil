@@ -82,6 +82,11 @@
         "charconv": "cpp",
         "forward_list": "cpp",
         "sstream": "cpp",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numeric": "cpp",
+        "format": "cpp",
+        "numbers": "cpp"
     },
 }

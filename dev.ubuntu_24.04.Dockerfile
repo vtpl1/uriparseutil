@@ -18,7 +18,7 @@ RUN apt update \
     RUN wget -O cmake.sh https://github.com/Kitware/CMake/releases/download/v3.28.5/cmake-3.28.5-linux-x86_64.sh && \
     sh cmake.sh --prefix=/usr/local/ --exclude-subdir && rm -rf cmake.sh
 
-ARG LLVM_VERSION=18
+ARG LLVM_VERSION=19
 RUN wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && ./llvm.sh ${LLVM_VERSION} all && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

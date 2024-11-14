@@ -18,9 +18,9 @@ find_package(fmt REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
-	clang-tidy-18;)
+	clang-tidy-19;)
 set(CMAKE_C_CLANG_TIDY
-	clang-tidy-18;)
+	clang-tidy-19;)
 endif()
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -58,16 +58,7 @@ add_library(${PROJECT_NAME}::${COMPONENT1} ALIAS ${COMPONENT1})
 
 configure_file(inc/version.h.in version.h)
 
-# These tests can use the Catch2-provided main
-add_executable(tests
-	src/test.cpp
-)
-
-target_link_libraries(tests
-	PRIVATE uriparseutil
-	PRIVATE absl::strings
-	PRIVATE fmt::fmt
-)
+add_subdirectory(test)
 
 include(GenerateExportHeader)
 generate_export_header(${COMPONENT1})
@@ -90,7 +81,9 @@ set_target_properties(
 		VERSION ${PROJECT_VERSION})
 
 target_link_libraries(${COMPONENT1}
-	PUBLIC Poco::Foundation
+	PRIVATE Poco::Foundation
+	PRIVATE fmt::fmt
+	PRIVATE absl::strings
 )
 
 ## Install library + targets ##################################################

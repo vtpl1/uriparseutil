@@ -7,10 +7,12 @@
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <absl/strings/str_split.h>
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <string>
+#include <cstddef>
 #include <vector>
 
+namespace {
 Channel parseChannel(const std::string& str, const char delim) {
   Channel channel;
 
@@ -39,6 +41,8 @@ Channel parseChannel(const std::string& str, const char delim) {
   return channel;
 }
 
+} // namespace
+
 // rtsp://172.20.1.160:8554/videos/1.mp4
 // rtsp://admin:AdmiN1234@172.20.1.160:8554/videos/1.mp4
 // rtsp://admin:AdmiN1234@172.20.1.160:8554/videos/1.mp4#site=1#channel=2#app=3
@@ -64,7 +68,7 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
     if (path_p.getExtension().empty()) {
       return uri_details;
     }
-    uri_details.scheme = path_p.getExtension();
+    uri_details.scheme        = path_p.getExtension();
     uri_details.relative_path = path_p.toString();
     uri_details.url           = path_p.toString();
   }
