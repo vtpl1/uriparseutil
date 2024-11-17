@@ -2,10 +2,15 @@
 #include <iostream>
 #include <optional>
 #include <uriparseutil.h>
+#include <Poco/Path.h>
 
 int main(int argc, char const* argv[]) {
 
   std::cout << "tests started\n";
+  {
+    auto a = vtpl::utilities::normalizeUri("rtsp://10.99.51.235/LiveMedia/ch1/Media3");
+    assert(a == "010_099_051_235_554__livemedia_ch1_media3");
+  }
   {
     auto a = vtpl::utilities::parseUri("");
     assert(a.scheme.empty());
@@ -199,6 +204,8 @@ int main(int argc, char const* argv[]) {
     assert(a.url == "grpcpva://172.16.1.22:20006/site/1/channel/3");
   }
   {
+    auto file = "videos/3/1.avf";
+    const Poco::Path path_p(file);
     auto a = vtpl::utilities::parseUri("videos/3/1.avf");
     assert(a.scheme == "avf");
     assert(a.host == std::nullopt);
@@ -212,8 +219,8 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.stream_type == std::nullopt);
     assert(a.channel.start_ts == std::nullopt);
     assert(a.channel.media_type == std::nullopt);
-    assert(a.relative_path == "videos/3/1.avf");
-    assert(a.url == "videos/3/1.avf");
+    assert(a.relative_path == path_p.toString());
+    assert(a.url == "avf://" + path_p.toString());
   }
   std::cout << "tests end\n";
   return 0;

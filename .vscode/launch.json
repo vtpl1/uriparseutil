@@ -8,7 +8,6 @@
             "name": "tests",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/test/tests",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -26,9 +25,15 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "windows": {
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/build/test/Debug/tests.exe",
+            },
+            "linux": {
+                "type": "cppdbg",
+                "program": "${workspaceFolder}/build/test/tests",
+            }
         }
-
-
     ]
 }

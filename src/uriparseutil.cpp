@@ -6,10 +6,13 @@
 
 #include <Poco/Path.h>
 #include <Poco/URI.h>
+#include <absl/strings/ascii.h>
+#include <absl/strings/str_replace.h>
 #include <absl/strings/str_split.h>
-#include <fmt/core.h>
-#include <string>
 #include <cstddef>
+#include <fmt/core.h>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace {
@@ -31,7 +34,7 @@ Channel parseChannel(const std::string& str, const char delim) {
       } else if (parts.at(0) == "stream") {
         channel.stream_type = std::stoi(parts.at(1));
       } else if (parts.at(0) == "timestamp") {
-        channel.start_ts = std::stol(parts.at(1));
+        channel.start_ts = std::stoull(parts.at(1));
       } else if (parts.at(0) == "media") {
         channel.media_type = std::stoi(parts.at(1));
       }
@@ -39,6 +42,26 @@ Channel parseChannel(const std::string& str, const char delim) {
   }
 
   return channel;
+}
+
+std::string normalizedIpAddress(const std::string& ip) {
+  std::stringstream        ss;
+  std::vector<std::string> v = absl::StrSplit(absl::string_view(ip.data(), ip.size()), '.', absl::SkipEmpty());
+  auto                     i = 0;
+  for (auto&& str : v) {
+    ss << fmt::format("{:03}", std::stoi(str));
+    if (++i < v.size()) {
+      ss << "_";
+    }
+  }
+
+  return ss.str();
+}
+
+std::string normalizedQuery(const std::string& query) {
+  return absl::StrReplaceAll(
+      absl::AsciiStrToLower(query),
+      {{"?", "_"}, {"%", "_"}, {"&", "_"}, {"=", "_"}, {"/", "_"}, {".", "_"}, {"-", "_"}, {"#", "_"}});
 }
 
 } // namespace
@@ -59,7 +82,8 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
   // std::cout << uri << "\n";
 
   // std::cout << "scheme:[" << uri_p.getScheme() << "], authority:[" << uri_p.getAuthority() << "], path:["
-  //           << uri_p.getPath() << "], path_query:[" << uri_p.getPathAndQuery() << "], path_etc:[" << uri_p.getPathEtc()
+  //           << uri_p.getPath() << "], path_query:[" << uri_p.getPathAndQuery() << "], path_etc:[" <<
+  //           uri_p.getPathEtc()
   //           << "], query:[" << uri_p.getQuery() << "], fragment:[" << uri_p.getFragment() << "]\n";
 
   if (uri_p.getScheme().empty()) {
@@ -68,7 +92,7 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
     if (path_p.getExtension().empty()) {
       return uri_details;
     }
-    uri_details.scheme        = path_p.getExtension();
+    uri_details.scheme        = absl::AsciiStrToLower(path_p.getExtension());
     uri_details.relative_path = path_p.toString();
     uri_details.url           = path_p.toString();
   }
@@ -79,8 +103,6 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
     uri_details.port   = uri_p.getPort();
 
     uri_details.relative_path = uri_p.getPathAndQuery();
-    uri_details.url           = fmt::format("{}://{}:{}{}", uri_p.getScheme(), uri_p.getHost(), uri_p.getPort(),
-                                            uri_details.relative_path.value_or(""));
 
     if (!uri_p.getUserInfo().empty()) {
       std::vector<std::string> elems = absl::StrSplit(uri_p.getUserInfo(), ':');
@@ -93,9 +115,10 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
     uri_details.channel = parseChannel(uri_p.getFragment(), '#');
   }
 
-  if (uri_details.scheme == "rtsp") {
+  uri_details.scheme = absl::AsciiStrToLower(uri_details.scheme);
+  if (absl::StartsWith(uri_details.scheme, "rtsp")) {
 
-  } else if (uri_details.scheme == "vms") {
+  } else if (absl::StartsWith(uri_details.scheme, "vms")) {
 
     std::vector<std::string> parts = absl::StrSplit(uri_p.getPath(), '/', absl::SkipWhitespace());
     if (parts.size() == 2) {
@@ -112,7 +135,10 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
       }
     }
 
-  } else if (uri_details.scheme == "grpc") {
+  } else if (absl::StartsWith(uri_details.scheme, "grpc")) {
+    if (uri_details.scheme == "grpc") {
+      uri_details.scheme = "grpcframe";
+    }
 
     std::vector<std::string> parts = absl::StrSplit(uri_p.getPath(), '/', absl::SkipWhitespace());
     for (size_t i = 0; i < parts.size() - 1; i = i + 2) {
@@ -123,6 +149,18 @@ UriDetails vtpl::utilities::parseUri(const std::string& uri) {
       }
     }
   }
+  if (uri_details.port || uri_details.host) {
+    uri_details.url = fmt::format("{}://{}:{}{}", uri_details.scheme, uri_details.host.value_or(""),
+                                  uri_details.port.value_or(0), uri_details.relative_path.value_or(""));
+  } else {
+    uri_details.url = fmt::format("{}://{}", uri_details.scheme, uri_details.relative_path.value_or(""));
+  }
 
   return uri_details;
+}
+
+std::string vtpl::utilities::normalizeUri(const std::string& uri) {
+  Poco::URI uri1(uri);
+  return fmt::format("{}_{}_{}", normalizedIpAddress(uri1.getHost()), uri1.getPort(),
+                     normalizedQuery(uri1.getPathAndQuery()));
 }

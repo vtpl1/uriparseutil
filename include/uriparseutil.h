@@ -36,7 +36,8 @@ struct UriDetails {
 
 namespace vtpl {
 namespace utilities {
-UriDetails URIPARSEUTIL_EXPORT parseUri(const std::string& uri);
+std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
+UriDetails URIPARSEUTIL_EXPORT  parseUri(const std::string& uri);
 } // namespace utilities
 } // namespace vtpl
 #endif // uriparseutil_h
