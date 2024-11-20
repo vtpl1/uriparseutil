@@ -48,14 +48,17 @@ std::string normalizedIpAddress(const std::string& ip) {
   std::stringstream        ss;
   std::vector<std::string> v = absl::StrSplit(absl::string_view(ip.data(), ip.size()), '.', absl::SkipEmpty());
   auto                     i = 0;
-  for (auto&& str : v) {
-    ss << fmt::format("{:03}", std::stoi(str));
-    if (++i < v.size()) {
-      ss << "_";
+  try {
+    for (auto&& str : v) {
+      ss << fmt::format("{:03}", std::stoi(str));
+      if (++i < v.size()) {
+        ss << "_";
+      }
     }
+    return ss.str();
+  } catch (const std::invalid_argument& e) {
   }
-
-  return ss.str();
+  return ip;
 }
 
 std::string normalizedQuery(const std::string& query) {

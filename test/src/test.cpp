@@ -8,8 +8,8 @@ int main(int argc, char const* argv[]) {
 
   std::cout << "tests started\n";
   {
-    auto a = vtpl::utilities::normalizeUri("rtsp://10.99.51.235/LiveMedia/ch1/Media3");
-    assert(a == "010_099_051_235_554__livemedia_ch1_media3");
+    auto a = vtpl::utilities::normalizeUri("rtsp://rtsp_server1:8554/videos/1.mp4");
+    assert(a == "rtsp_server1_8554__videos_1_mp4");
   }
   {
     auto a = vtpl::utilities::parseUri("");
