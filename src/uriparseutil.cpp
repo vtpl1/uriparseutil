@@ -62,9 +62,20 @@ std::string normalizedIpAddress(const std::string& ip) {
 }
 
 std::string normalizedQuery(const std::string& query) {
-  return absl::StrReplaceAll(
-      absl::AsciiStrToLower(query),
-      {{"?", "_"}, {"%", "_"}, {"&", "_"}, {"=", "_"}, {"/", "_"}, {".", "_"}, {"-", "_"}, {"#", "_"}});
+  return absl::StrReplaceAll(absl::AsciiStrToLower(query), {{"?", "_"},
+                                                            {"%", "_"},
+                                                            {"&", "_"},
+                                                            {"=", "_"},
+                                                            {"/", "_"},
+                                                            {".", "_"},
+                                                            {"-", "_"},
+                                                            {"<", "_"},
+                                                            {">", "_"},
+                                                            {":", "_"},
+                                                            {"\"", "_"},
+                                                            {"\\", "_"},
+                                                            {"|", "_"},
+                                                            {"*", "_"}});
 }
 
 } // namespace
