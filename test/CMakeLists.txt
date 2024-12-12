@@ -4,11 +4,11 @@
 
 find_package(Poco REQUIRED Foundation)
 
-add_executable(tests
+add_executable(tests_uriparseutil
 	src/test.cpp
 )
 
-target_link_libraries(tests
+target_link_libraries(tests_uriparseutil
 	PRIVATE uriparseutil
 	PRIVATE Poco::Foundation
 )
