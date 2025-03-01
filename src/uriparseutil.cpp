@@ -16,8 +16,8 @@
 #include <vector>
 
 namespace {
-Channel parseChannel(const std::string& str, const char delim) {
-  Channel channel;
+vtpl::utilities::Channel parseChannel(const std::string& str, const char delim) {
+  vtpl::utilities::Channel channel;
 
   const std::vector<std::string> fragments = absl::StrSplit(str, delim, absl::SkipWhitespace());
   for (auto&& elem : fragments) {
@@ -89,8 +89,8 @@ std::string normalizedQuery(const std::string& query) {
 // grpc://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2
 // videos/1.avf
 
-UriDetails vtpl::utilities::parseUri(const std::string& uri) {
-  UriDetails uri_details;
+vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri) {
+  vtpl::utilities::UriDetails uri_details;
 
   const Poco::URI uri_p(uri);
   // std::cout << uri << "\n";

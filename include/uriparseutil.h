@@ -12,7 +12,10 @@
 #include <uriparseutil_export.h>
 #include <version.h>
 
-struct Channel {
+namespace vtpl {
+namespace utilities {
+class URIPARSEUTIL_EXPORT Channel {
+public:
   std::optional<uint32_t> site_id;
   std::optional<uint32_t> channel_id;
   std::optional<uint32_t> app_id;
@@ -22,7 +25,8 @@ struct Channel {
   std::optional<uint32_t> media_type;
 };
 
-struct UriDetails {
+class URIPARSEUTIL_EXPORT UriDetails {
+public:
   std::string                scheme;
   std::optional<std::string> url;
   std::optional<std::string> host;
@@ -34,8 +38,6 @@ struct UriDetails {
   Channel channel;
 };
 
-namespace vtpl {
-namespace utilities {
 std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
 UriDetails URIPARSEUTIL_EXPORT  parseUri(const std::string& uri);
 } // namespace utilities
