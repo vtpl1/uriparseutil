@@ -12,7 +12,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false,
+            "console": "integratedTerminal",
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -28,7 +28,7 @@
             ],
             "windows": {
                 "type": "cppvsdbg",
-                "program": "${workspaceFolder}/build/test/Debug/tests.exe",
+                "program": "${workspaceFolder}/build/test/Debug/tests_uriparseutil.exe",
             },
             "linux": {
                 "type": "cppdbg",

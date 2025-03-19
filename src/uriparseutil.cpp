@@ -89,9 +89,15 @@ std::string normalizedQuery(const std::string& query) {
 // grpc://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2
 // videos/1.avf
 
-vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri) {
+vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in) {
   vtpl::utilities::UriDetails uri_details;
-
+  std::vector<std::string> v = absl::StrSplit(uri_in, absl::ByAnyChar(" ,\t"), absl::SkipEmpty());
+  std::string uri(uri_in);
+  if (v.size() >= 3) {
+    uri = v[0];
+    uri_details.username = v[1];
+    uri_details.password = v[2];
+  }
   const Poco::URI uri_p(uri);
   // std::cout << uri << "\n";
 
