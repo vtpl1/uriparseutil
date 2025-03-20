@@ -2,10 +2,11 @@
   "name": "uriparseutil",
   "version": "3.1.0",
   "description": "Uri parse util",
-  "homepage": "http://github.com/uriparseutil",
+  "homepage": "http://github.com/vtpl1/uriparseutil",
   "dependencies": [
     "abseil",
-    "poco",
-    "fmt"
+    "fmt",
+    "inja",
+    "poco"
   ]
 }
