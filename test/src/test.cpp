@@ -240,7 +240,25 @@ int main(int argc, char const* argv[]) {
     assert(a.relative_path == path_p.toString());
     assert(a.url == "avf://" + path_p.toString());
   }
-
+  {
+    auto             file = "C:\\WorkFiles\\thirdparty\\videos\\20250327_052532.avf";
+    const Poco::Path path_p(file);
+    auto             a = vtpl::utilities::parseUri(file);
+    assert(a.scheme == "avf");
+    assert(a.host == std::nullopt);
+    assert(a.port == std::nullopt);
+    assert(a.username == std::nullopt);
+    assert(a.password == std::nullopt);
+    assert(a.channel.site_id == std::nullopt);
+    assert(a.channel.channel_id == std::nullopt);
+    assert(a.channel.app_id == std::nullopt);
+    assert(a.channel.live_or_rec == std::nullopt);
+    assert(a.channel.stream_type == std::nullopt);
+    assert(a.channel.start_ts == std::nullopt);
+    assert(a.channel.media_type == std::nullopt);
+    assert(a.relative_path == path_p.toString());
+    assert(a.url == "avf://" + path_p.toString());
+  }
   {
     auto a = vtpl::utilities::parseUri("rtsp://172.16.1.146:8554/videos/1.mp4 admin AdmiN1234");
     assert(a.scheme == "rtsp");

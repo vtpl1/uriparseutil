@@ -91,10 +91,10 @@ std::string normalizedQuery(const std::string& query) {
 
 vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in) {
   vtpl::utilities::UriDetails uri_details;
-  std::vector<std::string> v = absl::StrSplit(uri_in, absl::ByAnyChar(" ,\t"), absl::SkipEmpty());
-  std::string uri(uri_in);
+  std::vector<std::string>    v = absl::StrSplit(uri_in, absl::ByAnyChar(" ,\t"), absl::SkipEmpty());
+  std::string                 uri(uri_in);
   if (v.size() >= 3) {
-    uri = v[0];
+    uri                  = v[0];
     uri_details.username = v[1];
     uri_details.password = v[2];
   }
@@ -106,7 +106,17 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
   //           uri_p.getPathEtc()
   //           << "], query:[" << uri_p.getQuery() << "], fragment:[" << uri_p.getFragment() << "]\n";
 
-  if (uri_p.getScheme().empty()) {
+  std::vector<std::string> known_schemes = {"rtsp", "vms", "grpc", "http"};
+
+  bool is_known_schemes = false;
+  for (auto&& known_scheme : known_schemes) {
+    if (absl::StartsWith(uri_p.getScheme(), known_scheme)) {
+      is_known_schemes = true;
+      break;
+    }
+  }
+
+  if (!is_known_schemes) {
     const Poco::Path path_p(uri);
 
     if (path_p.getExtension().empty()) {
@@ -183,4 +193,37 @@ std::string vtpl::utilities::normalizeUri(const std::string& uri) {
   Poco::URI uri1(uri);
   return fmt::format("{}_{}_{}", normalizedIpAddress(uri1.getHost()), uri1.getPort(),
                      normalizedQuery(uri1.getPathAndQuery()));
+}
+
+std::string vtpl::utilities::Channel::to_string() {
+  std::optional<uint32_t> site_id;
+  std::optional<uint32_t> channel_id;
+  std::optional<uint32_t> app_id;
+  std::optional<uint32_t> live_or_rec;
+  std::optional<uint32_t> stream_type;
+  std::optional<uint64_t> start_ts;
+  std::optional<uint32_t> media_type;
+  std::stringstream       ss;
+  if (site_id) {
+    ss << "#site=" << site_id.value();
+  }
+  if (channel_id) {
+    ss << "#channel=" << channel_id.value();
+  }
+  if (app_id) {
+    ss << "#app=" << app_id.value();
+  }
+  if (live_or_rec) {
+    ss << "#live=" << live_or_rec.value();
+  }
+  if (stream_type) {
+    ss << "#stream=" << stream_type.value();
+  }
+  if (start_ts) {
+    ss << "#timestamp=" << start_ts.value();
+  }
+  if (media_type) {
+    ss << "#media=" << media_type.value();
+  }
+  return ss.str();
 }

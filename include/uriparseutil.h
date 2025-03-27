@@ -23,6 +23,7 @@ public:
   std::optional<uint32_t> stream_type;
   std::optional<uint64_t> start_ts;
   std::optional<uint32_t> media_type;
+  std::string             to_string();
 };
 
 class URIPARSEUTIL_EXPORT UriDetails {
