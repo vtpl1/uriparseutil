@@ -14,6 +14,9 @@ RUN apt update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+RUN wget -O cmake.sh https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.sh && \
+    sh cmake.sh --prefix=/usr/local/ --exclude-subdir && rm -rf cmake.sh
+
 ENV SHELL=/bin/bash
 
 ARG USERNAME=vscode
