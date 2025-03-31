@@ -1,4 +1,3 @@
-#include <Poco/Path.h>
 #include <cassert>
 #include <iostream>
 #include <optional>
@@ -233,8 +232,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
-    auto             file = "videos/3/1.avf";
-    const Poco::Path path_p(file);
+    // const Poco::Path path_p(file);
     auto             a = vtpl::utilities::parseUri("videos/3/1.avf");
     assert(a.scheme == "avf");
     assert(a.host == std::nullopt);
@@ -248,13 +246,14 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.stream_type == std::nullopt);
     assert(a.channel.start_ts == std::nullopt);
     assert(a.channel.media_type == std::nullopt);
-    assert(a.relative_path == path_p.toString());
-    assert(a.url == "avf://" + path_p.toString());
+    // auto relative_path = path_p.toString();
+    assert(a.relative_path == "videos/3/1.avf");
+    assert(a.url == "avf://videos/3/1.avf");
     assert(a.channel.toString().empty() == true);
   }
   {
     auto             file = "C:\\WorkFiles\\thirdparty\\videos\\20250327_052532.avf";
-    const Poco::Path path_p(file);
+    // const Poco::Path path_p(file);
     auto             a = vtpl::utilities::parseUri(file);
     assert(a.scheme == "avf");
     assert(a.host == std::nullopt);
@@ -268,8 +267,8 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.stream_type == std::nullopt);
     assert(a.channel.start_ts == std::nullopt);
     assert(a.channel.media_type == std::nullopt);
-    assert(a.relative_path == path_p.toString());
-    assert(a.url == "avf://" + path_p.toString());
+    assert(a.relative_path == "C:\\WorkFiles\\thirdparty\\videos\\20250327_052532.avf");
+    assert(a.url == "avf://C:\\WorkFiles\\thirdparty\\videos\\20250327_052532.avf");
     assert(a.channel.toString().empty() == true);
   }
   {

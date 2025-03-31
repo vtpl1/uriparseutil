@@ -12,9 +12,6 @@ project(uriparseutil
 	LANGUAGES CXX)
 set(COMPONENT1 uriparseutil)
 
-find_package(Poco REQUIRED Foundation)
-find_package(absl REQUIRED)
-find_package(fmt REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
@@ -80,11 +77,11 @@ set_target_properties(
 		SOVERSION	${PROJECT_VERSION_MAJOR}
 		VERSION ${PROJECT_VERSION})
 
-target_link_libraries(${COMPONENT1}
-	PRIVATE Poco::Foundation
-	PRIVATE fmt::fmt
-	PRIVATE absl::strings
-)
+# target_link_libraries(${COMPONENT1}
+# 	PRIVATE Poco::Foundation
+# 	PRIVATE fmt::fmt
+# 	PRIVATE absl::strings
+# )
 
 ## Install library + targets ##################################################
 include(CMakePackageConfigHelpers)

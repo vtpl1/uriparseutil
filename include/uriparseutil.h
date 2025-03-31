@@ -23,10 +23,11 @@ public:
   std::optional<uint32_t> stream_type;
   std::optional<uint32_t> media_type;
   std::optional<uint64_t> start_ts;
-  std::string             toString();
-  bool                    fromString(std::string str);
-  std::string             toJSON();
-  bool                    fromJSON(std::string jsonStr);
+
+  std::string    toString();
+  static Channel fromString(std::string str);
+  std::string    toJSON();
+  static Channel fromJSON(std::string jsonStr);
 };
 
 class URIPARSEUTIL_EXPORT UriDetails {
@@ -40,6 +41,11 @@ public:
   std::optional<std::string> relative_path;
 
   Channel channel;
+
+  std::string       toString();
+  static UriDetails fromString(std::string str);
+  std::string       toJSON();
+  static UriDetails fromJSON(std::string jsonStr);
 };
 
 std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
