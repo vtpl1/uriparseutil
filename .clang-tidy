@@ -9,6 +9,7 @@ Checks:          'clang-diagnostic-*,
                   readability-*,
                   cppcoreguidelines-*,
                   misc-*,
+                  -readability-identifier-length,
                   -modernize-use-trailing-return-type'
 WarningsAsErrors: ''
 HeaderFileExtensions:

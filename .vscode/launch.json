@@ -32,7 +32,7 @@
             },
             "linux": {
                 "type": "cppdbg",
-                "program": "${workspaceFolder}/build/test/tests",
+                "program": "${workspaceFolder}/build/test/tests_uriparseutil",
             }
         }
     ]

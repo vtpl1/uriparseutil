@@ -3,6 +3,11 @@
 # *****************************************************
 cmake_minimum_required(VERSION 3.15)
 
+option(BUILD_JSON "Build json" ON)
+if(BUILD_JSON)
+  list(APPEND VCPKG_MANIFEST_FEATURES "json")
+endif()
+
 set(VERSION 3.2.0)
 
 project(uriparseutil
@@ -15,9 +20,9 @@ set(COMPONENT1 uriparseutil)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
-	clang-tidy-18;)
+	clang-tidy-19;)
 set(CMAKE_C_CLANG_TIDY
-	clang-tidy-18;)
+	clang-tidy-19;)
 endif()
 
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)

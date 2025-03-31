@@ -4,12 +4,32 @@
 
 #include "uriparseutil.h"
 #include <algorithm>
+#include <cctype>
 #include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <optional>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace {
+// trim from start (in place)
+inline void ltrim(std::string& s) {
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+}
+
+// trim from end (in place)
+inline void rtrim(std::string& s) {
+  s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(), s.end());
+}
+
+// trim from both ends (in place)
+inline void trim(std::string& s) {
+  rtrim(s);
+  ltrim(s);
+}
 
 std::string normalizedIpAddress(const std::string& ip) {
   std::stringstream  ss;
@@ -18,7 +38,7 @@ std::string normalizedIpAddress(const std::string& ip) {
   int                i = 0;
   while (std::getline(iss, token, '.')) {
     try {
-      ss << (i++ ? "_" : "") << std::to_string(std::stoi(token)).insert(0, 3 - token.length(), '0');
+      ss << (((i++) != 0) ? "_" : "") << std::to_string(std::stoi(token)).insert(0, 3 - token.length(), '0');
     } catch (...) {
       return ip;
     }
@@ -38,6 +58,47 @@ std::string normalizedQuery(std::string query) {
   return query;
 }
 
+std::unordered_map<std::string, std::string> parseJson(const std::string& json_str) {
+  std::unordered_map<std::string, std::string> result;
+
+  std::string key, value;
+  bool        in_key = false, in_value = false;
+  bool        is_string = false;
+
+  for (size_t i = 0; i < json_str.length(); ++i) {
+    char c = json_str[i];
+    if (c == '"') {
+      is_string = !is_string;
+      continue;
+    }
+    if (is_string) {
+      if (in_key)
+        key += c;
+      else if (in_value)
+        value += c;
+    } else {
+      if (c == ':') {
+        in_key   = false;
+        in_value = true;
+      } else if (c == ',' || c == '}') {
+        if (!key.empty() && !value.empty()) {
+          result[key] = value;
+        }
+        key.clear();
+        value.clear();
+        in_key   = true;
+        in_value = false;
+      } else if (c != '{' && c != ' ') {
+        if (in_key)
+          key += c;
+        else if (in_value)
+          value += c;
+      }
+    }
+  }
+  return result;
+}
+
 } // namespace
 
 // rtsp://172.20.1.160:8554/videos/1.mp4
@@ -49,6 +110,7 @@ std::string normalizedQuery(std::string query) {
 // grpc://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2
 // videos/1.avf
 
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in) {
   vtpl::utilities::UriDetails uri_details;
   std::istringstream          iss(uri_in);
@@ -85,9 +147,9 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
 
     auto pos_at = host_port_and_user_pass.rfind('@');
     if (pos_at != std::string::npos) {
-      std::string userinfo    = host_port_and_user_pass.substr(0, pos_at);
-      host_port_and_user_pass = host_port_and_user_pass.substr(pos_at + 1);
-      auto pos_colon          = userinfo.find(':');
+      const std::string userinfo = host_port_and_user_pass.substr(0, pos_at);
+      host_port_and_user_pass    = host_port_and_user_pass.substr(pos_at + 1);
+      auto pos_colon             = userinfo.find(':');
       if (pos_colon != std::string::npos) {
         uri_details.username = userinfo.substr(0, pos_colon);
         uri_details.password = userinfo.substr(pos_colon + 1);
@@ -106,9 +168,9 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
 
   auto pos_fragment = relative_path_and_fragment.find('#');
   if (pos_fragment != std::string::npos) {
-    uri_details.relative_path = relative_path_and_fragment.substr(0, pos_fragment);
-    std::string fragment      = relative_path_and_fragment.substr(pos_fragment + 1);
-    uri_details.channel       = parseChannel(fragment);
+    uri_details.relative_path  = relative_path_and_fragment.substr(0, pos_fragment);
+    const std::string fragment = relative_path_and_fragment.substr(pos_fragment + 1);
+    uri_details.channel        = vtpl::utilities::Channel::fromString(fragment);
   } else {
     if (!relative_path_and_fragment.empty()) {
       uri_details.relative_path = relative_path_and_fragment;
@@ -116,7 +178,7 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
   }
 
   if (uri_details.relative_path) {
-    std::string relative_path = uri_details.relative_path.value();
+    const std::string relative_path = uri_details.relative_path.value();
     if ((uri_details.scheme.find("vms") == 0) || (uri_details.scheme.find("grpc") == 0)) {
       std::istringstream       path_stream(relative_path);
       std::vector<std::string> parts;
@@ -172,53 +234,207 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
 }
 
 std::string vtpl::utilities::normalizeUri(const std::string& uri) {
-  vtpl::utilities::UriDetails details = vtpl::utilities::parseUri(uri);
+  const vtpl::utilities::UriDetails details = vtpl::utilities::parseUri(uri);
   return normalizedIpAddress(details.host.value_or("")) + "_" + std::to_string(details.port.value_or(0)) + "_" +
          normalizedQuery(details.relative_path.value_or(""));
 }
 
 std::string vtpl::utilities::Channel::toString() {
   std::ostringstream ss;
-  if (site_id)
+  if (site_id) {
     ss << "#site=" << *site_id;
-  if (channel_id)
+  }
+  if (channel_id) {
     ss << "#channel=" << *channel_id;
-  if (app_id)
+  }
+  if (app_id) {
     ss << "#app=" << *app_id;
-  if (live_or_rec)
+  }
+  if (live_or_rec) {
     ss << "#live=" << *live_or_rec;
-  if (stream_type)
+  }
+  if (stream_type) {
     ss << "#stream=" << *stream_type;
-  if (media_type)
+  }
+  if (media_type) {
     ss << "#media=" << *media_type;
-  if (start_ts)
+  }
+  if (start_ts) {
     ss << "#timestamp=" << *start_ts;
+  }
   return ss.str();
 }
 
-vtpl::utilities::Channel vtpl::utilities::parseChannel(const std::string& channel) {
+vtpl::utilities::Channel vtpl::utilities::Channel::fromString(std::string str) {
   vtpl::utilities::Channel ch;
-  std::istringstream       iss(channel);
+  std::istringstream       iss(str);
   std::string              segment;
   while (std::getline(iss, segment, '#')) {
     auto pos = segment.find('=');
     if (pos != std::string::npos) {
-      std::string key = segment.substr(0, pos);
-      if (key == "site")
+      const std::string key = segment.substr(0, pos);
+      if (key == "site") {
         ch.site_id = std::stoi(segment.substr(pos + 1));
-      else if (key == "channel")
+      } else if (key == "channel") {
         ch.channel_id = std::stoi(segment.substr(pos + 1));
-      else if (key == "app")
+      } else if (key == "app") {
         ch.app_id = std::stoi(segment.substr(pos + 1));
-      else if (key == "live")
+      } else if (key == "live") {
         ch.live_or_rec = std::stoi(segment.substr(pos + 1));
-      else if (key == "stream")
+      } else if (key == "stream") {
         ch.stream_type = std::stoi(segment.substr(pos + 1));
-      else if (key == "media")
+      } else if (key == "media") {
         ch.media_type = std::stoi(segment.substr(pos + 1));
-      else if (key == "timestamp")
+      } else if (key == "timestamp") {
         ch.start_ts = std::stoull(segment.substr(pos + 1));
+      }
     }
   }
   return ch;
+}
+
+std::string vtpl::utilities::Channel::toJSON() const {
+  std::ostringstream oss;
+  oss << "{";
+  bool first = true;
+
+  auto add_field = [&](const std::string& key, const auto& value) {
+    if (value) {
+      if (!first)
+        oss << ", ";
+      oss << "\"" << key << "\": " << *value;
+      first = false;
+    }
+  };
+
+  add_field("site_id", site_id);
+  add_field("channel_id", channel_id);
+  add_field("app_id", app_id);
+  add_field("live_or_rec", live_or_rec);
+  add_field("stream_type", stream_type);
+  add_field("media_type", media_type);
+  add_field("start_ts", start_ts);
+
+  oss << "}";
+  return oss.str();
+}
+
+vtpl::utilities::Channel vtpl::utilities::Channel::fromJSON(std::string jsonStr) {
+  auto    data = parseJson(jsonStr);
+  Channel channel;
+  if (data.find("site_id") != data.end()) {
+    channel.site_id = std::stoul(data.at("site_id"));
+  }
+  if (data.find("channel_id") != data.end()) {
+    channel.channel_id = std::stoul(data.at("channel_id"));
+  }
+  if (data.find("app_id") != data.end()) {
+    channel.app_id = std::stoul(data.at("app_id"));
+  }
+  if (data.find("live_or_rec") != data.end()) {
+    channel.live_or_rec = std::stoul(data.at("live_or_rec"));
+  }
+  if (data.find("stream_type") != data.end()) {
+    channel.stream_type = std::stoul(data.at("stream_type"));
+  }
+  if (data.find("media_type") != data.end()) {
+    channel.media_type = std::stoul(data.at("media_type"));
+  }
+  if (data.find("start_ts") != data.end()) {
+    channel.start_ts = std::stoull(data.at("start_ts"));
+  }
+
+  return channel;
+}
+
+std::string vtpl::utilities::UriDetails::toString() {
+  std::stringstream ss;
+  ss << "URI Details:\n";
+  ss << "scheme: " << scheme << "\n";
+  if (url) {
+    ss << "url: " << *url << "\n";
+  }
+  if (host) {
+    ss << "host: " << *host << "\n";
+  }
+  if (port) {
+    ss << "port: " << *port << "\n";
+  }
+  if (username) {
+    ss << "username: " << *username << "\n";
+  }
+  if (password) {
+    ss << "password: " << *password << "\n";
+  }
+  if (relative_path) {
+    ss << "relative_path: " << *relative_path << "\n";
+  }
+  ss << "channel: " << channel.toString();
+  return ss.str();
+}
+
+std::string vtpl::utilities::UriDetails::toJSON() {
+  std::ostringstream oss;
+  oss << "{";
+  bool first = true;
+
+  auto add_field = [&](const std::string& key, const auto& value) {
+    if (value) {
+      if (!first)
+        oss << ", ";
+      oss << "\"" << key << "\": \"" << *value << "\"";
+      first = false;
+    }
+  };
+  add_field("scheme", std::optional(scheme));
+  // oss << "\"scheme\": \"" << scheme << "\"";
+  add_field("url", url);
+  add_field("host", host);
+  add_field("username", username);
+  add_field("password", password);
+  add_field("relative_path", relative_path);
+  if (port) {
+    if (!first)
+      oss << ", ";
+    oss << "\"port\": " << *port;
+    first = false;
+  }
+  oss << ", \"channel\": " << channel.toJSON();
+
+  oss << "}";
+  return oss.str();
+}
+
+vtpl::utilities::UriDetails vtpl::utilities::UriDetails::fromJSON(std::string jsonStr) {
+  auto data = parseJson(jsonStr);
+
+  vtpl::utilities::UriDetails uri;
+  if (data.find("scheme") != data.end()) {
+    std::string s = data.at("scheme");
+    trim(s);
+    uri.scheme = s;
+  }
+  if (data.find("url") != data.end()) {
+    uri.url = data.at("url");
+  }
+  if (data.find("host") != data.end()) {
+    uri.host = data.at("host");
+  }
+  if (data.find("port") != data.end()) {
+    uri.port = std::stoul(data.at("port"));
+  }
+  if (data.find("username") != data.end()) {
+    uri.username = data.at("username");
+  }
+  if (data.find("password") != data.end()) {
+    uri.password = data.at("password");
+  }
+  if (data.find("relative_path") != data.end()) {
+    uri.relative_path = data.at("relative_path");
+  }
+  if (data.find("channel") != data.end()) {
+    uri.channel = vtpl::utilities::Channel::fromJSON(data.at("channel"));
+  }
+
+  return uri;
 }
