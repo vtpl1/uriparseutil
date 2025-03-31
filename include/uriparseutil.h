@@ -21,9 +21,12 @@ public:
   std::optional<uint32_t> app_id;
   std::optional<uint32_t> live_or_rec;
   std::optional<uint32_t> stream_type;
-  std::optional<uint64_t> start_ts;
   std::optional<uint32_t> media_type;
-  std::string             to_string();
+  std::optional<uint64_t> start_ts;
+  std::string             toString();
+  bool                    fromString(std::string str);
+  std::string             toJSON();
+  bool                    fromJSON(std::string jsonStr);
 };
 
 class URIPARSEUTIL_EXPORT UriDetails {
@@ -41,6 +44,7 @@ public:
 
 std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
 UriDetails URIPARSEUTIL_EXPORT  parseUri(const std::string& uri);
+Channel URIPARSEUTIL_EXPORT     parseChannel(const std::string& channel);
 } // namespace utilities
 } // namespace vtpl
 #endif // uriparseutil_h

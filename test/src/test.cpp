@@ -27,6 +27,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == std::nullopt);
     assert(a.url == std::nullopt);
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://172.20.1.160:8554/videos/1.mp4");
@@ -44,6 +45,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4");
     assert(a.url == "rtsp://172.20.1.160:8554/videos/1.mp4");
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://admin:AdmiN1234@172.20.1.160:8554/videos/1.mp4");
@@ -61,6 +63,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4");
     assert(a.url == "rtsp://172.20.1.160:8554/videos/1.mp4");
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://admin:AdmiN1234@172.20.1.160:8554/videos/1.mp4#site=1#channel=2#app=0");
@@ -78,6 +81,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4");
     assert(a.url == "rtsp://172.20.1.160:8554/videos/1.mp4");
+    assert(a.channel.toString() == "#site=1#channel=2#app=0");
   }
   {
     auto a = vtpl::utilities::parseUri(
@@ -96,6 +100,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4?extra=%23channel%3D2%23app%3D3");
     assert(a.url == "rtsp://172.20.1.160:8554/videos/1.mp4?extra=%23channel%3D2%23app%3D3");
+    assert(a.channel.toString() == "#site=1#channel=2#app=0");
   }
   {
     auto a = vtpl::utilities::parseUri("vms://172.16.1.173:3005/44/0");
@@ -130,10 +135,11 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "vms://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2");
   }
   {
     auto a = vtpl::utilities::parseUri(
-        "grpcframe://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#timestamp=1731174970344#media=2");
+        "grpcframe://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2#timestamp=1731174970344");
     assert(a.scheme == "grpcframe");
     assert(a.host == "172.16.1.22");
     assert(a.port == 20006);
@@ -148,10 +154,11 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "grpcframe://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
     auto a = vtpl::utilities::parseUri(
-        "grpc://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#timestamp=1731174970344#media=2");
+        "grpc://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2#timestamp=1731174970344");
     assert(a.scheme == "grpcframe");
     assert(a.host == "172.16.1.22");
     assert(a.port == 20006);
@@ -166,10 +173,11 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "grpcframe://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
     auto a = vtpl::utilities::parseUri(
-        "grpcframepva://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#timestamp=1731174970344#media=2");
+        "grpcframepva://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#media=2#timestamp=1731174970344");
     assert(a.scheme == "grpcframepva");
     assert(a.host == "172.16.1.22");
     assert(a.port == 20006);
@@ -184,10 +192,11 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "grpcframepva://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
     auto a = vtpl::utilities::parseUri(
-        "grpcpva://172.16.1.22:20006/site/1/channel/3#live=1#stream=0#timestamp=1731174970344#media=2");
+        "grpcpva://172.16.1.22:20006/site/1/channel/3#site=2#live=1#stream=0#media=2#timestamp=1731174970344");
     assert(a.scheme == "grpcpva");
     assert(a.host == "172.16.1.22");
     assert(a.port == 20006);
@@ -202,10 +211,11 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "grpcpva://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
     auto a = vtpl::utilities::parseUri("grpcpva://172.16.1.22:20006/site/1/channel/"
-                                       "3#live=1#stream=0#timestamp=1731174970344#media=2  admin AdmiN1234");
+                                       "3#live=1#stream=0#media=2#timestamp=1731174970344  admin AdmiN1234");
     assert(a.scheme == "grpcpva");
     assert(a.host == "172.16.1.22");
     assert(a.port == 20006);
@@ -220,6 +230,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == 2);
     assert(a.relative_path == "/site/1/channel/3");
     assert(a.url == "grpcpva://172.16.1.22:20006/site/1/channel/3");
+    assert(a.channel.toString() == "#site=1#channel=3#live=1#stream=0#media=2#timestamp=1731174970344");
   }
   {
     auto             file = "videos/3/1.avf";
@@ -239,6 +250,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == path_p.toString());
     assert(a.url == "avf://" + path_p.toString());
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto             file = "C:\\WorkFiles\\thirdparty\\videos\\20250327_052532.avf";
@@ -258,6 +270,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == path_p.toString());
     assert(a.url == "avf://" + path_p.toString());
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://172.16.1.146:8554/videos/1.mp4 admin AdmiN1234");
@@ -275,6 +288,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4");
     assert(a.url == "rtsp://172.16.1.146:8554/videos/1.mp4");
+    assert(a.channel.toString().empty() == true);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0 admin AdmiN1234");
@@ -292,6 +306,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/videos/1.mp4");
     assert(a.url == "rtsp://172.16.1.146:8554/videos/1.mp4");
+    assert(a.channel.toString() == "#site=1#channel=2#app=0");
   }
 
 

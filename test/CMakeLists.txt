@@ -5,7 +5,8 @@
 find_package(Poco REQUIRED Foundation)
 
 add_executable(tests_uriparseutil
-	src/test.cpp
+	# src/test.cpp
+	src/main.cpp
 )
 
 target_link_libraries(tests_uriparseutil

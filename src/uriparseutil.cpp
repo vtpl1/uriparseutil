@@ -16,33 +16,6 @@
 #include <vector>
 
 namespace {
-vtpl::utilities::Channel parseChannel(const std::string& str, const char delim) {
-  vtpl::utilities::Channel channel;
-
-  const std::vector<std::string> fragments = absl::StrSplit(str, delim, absl::SkipWhitespace());
-  for (auto&& elem : fragments) {
-    std::vector<std::string> parts = absl::StrSplit(elem, '=');
-    if (parts.size() == 2) {
-      if (parts.at(0) == "site") {
-        channel.site_id = std::stoi(parts.at(1));
-      } else if (parts.at(0) == "channel") {
-        channel.channel_id = std::stoi(parts.at(1));
-      } else if (parts.at(0) == "app") {
-        channel.app_id = std::stoi(parts.at(1));
-      } else if (parts.at(0) == "live") {
-        channel.live_or_rec = std::stoi(parts.at(1));
-      } else if (parts.at(0) == "stream") {
-        channel.stream_type = std::stoi(parts.at(1));
-      } else if (parts.at(0) == "timestamp") {
-        channel.start_ts = std::stoull(parts.at(1));
-      } else if (parts.at(0) == "media") {
-        channel.media_type = std::stoi(parts.at(1));
-      }
-    }
-  }
-
-  return channel;
-}
 
 std::string normalizedIpAddress(const std::string& ip) {
   std::stringstream        ss;
@@ -142,7 +115,7 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
       }
     }
 
-    uri_details.channel = parseChannel(uri_p.getFragment(), '#');
+    uri_details.channel = parseChannel(uri_p.getFragment());
   }
 
   uri_details.scheme = absl::AsciiStrToLower(uri_details.scheme);
@@ -195,15 +168,8 @@ std::string vtpl::utilities::normalizeUri(const std::string& uri) {
                      normalizedQuery(uri1.getPathAndQuery()));
 }
 
-std::string vtpl::utilities::Channel::to_string() {
-  std::optional<uint32_t> site_id;
-  std::optional<uint32_t> channel_id;
-  std::optional<uint32_t> app_id;
-  std::optional<uint32_t> live_or_rec;
-  std::optional<uint32_t> stream_type;
-  std::optional<uint64_t> start_ts;
-  std::optional<uint32_t> media_type;
-  std::stringstream       ss;
+std::string vtpl::utilities::Channel::toString() {
+  std::stringstream ss;
   if (site_id) {
     ss << "#site=" << site_id.value();
   }
@@ -219,11 +185,43 @@ std::string vtpl::utilities::Channel::to_string() {
   if (stream_type) {
     ss << "#stream=" << stream_type.value();
   }
-  if (start_ts) {
-    ss << "#timestamp=" << start_ts.value();
-  }
   if (media_type) {
     ss << "#media=" << media_type.value();
   }
+  if (start_ts) {
+    ss << "#timestamp=" << start_ts.value();
+  }
   return ss.str();
+}
+
+vtpl::utilities::Channel parseChannelInternal(const std::string& str, const char delim) {
+  vtpl::utilities::Channel channel;
+
+  const std::vector<std::string> fragments = absl::StrSplit(str, delim, absl::SkipWhitespace());
+  for (auto&& elem : fragments) {
+    std::vector<std::string> parts = absl::StrSplit(elem, '=');
+    if (parts.size() == 2) {
+      if (parts.at(0) == "site") {
+        channel.site_id = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "channel") {
+        channel.channel_id = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "app") {
+        channel.app_id = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "live") {
+        channel.live_or_rec = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "stream") {
+        channel.stream_type = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "media") {
+        channel.media_type = std::stoi(parts.at(1));
+      } else if (parts.at(0) == "timestamp") {
+        channel.start_ts = std::stoull(parts.at(1));
+      }
+    }
+  }
+
+  return channel;
+}
+
+vtpl::utilities::Channel vtpl::utilities::parseChannel(const std::string& channel) {
+  return parseChannelInternal(channel, '#');
 }
