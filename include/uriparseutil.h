@@ -45,7 +45,7 @@ public:
   std::string       toString();
   static UriDetails fromString(std::string str);
   std::string       toJSON();
-  static UriDetails fromJSON(std::string jsonStr);
+  // static UriDetails fromJSON(std::string jsonStr);
 };
 
 std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
