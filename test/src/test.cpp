@@ -29,21 +29,6 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.toString().empty() == true);
     std::string s = R"({"scheme": "", "channel": {}})";
     assert(a.toJSON() == s);
-    auto b = vtpl::utilities::UriDetails::fromJSON(s);
-    assert(b.scheme.empty());
-    assert(b.host == std::nullopt);
-    assert(b.port == std::nullopt);
-    assert(b.username == std::nullopt);
-    assert(b.password == std::nullopt);
-    assert(b.channel.site_id == std::nullopt);
-    assert(b.channel.channel_id == std::nullopt);
-    assert(b.channel.app_id == std::nullopt);
-    assert(b.channel.live_or_rec == std::nullopt);
-    assert(b.channel.stream_type == std::nullopt);
-    assert(b.channel.start_ts == std::nullopt);
-    assert(b.channel.media_type == std::nullopt);
-    assert(b.relative_path == std::nullopt);
-    assert(b.url == std::nullopt);
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://172.20.1.160:8554/videos/1.mp4");
@@ -65,21 +50,6 @@ int main(int argc, char const* argv[]) {
     std::string s =
         R"({"scheme": "rtsp", "url": "rtsp://172.20.1.160:8554/videos/1.mp4", "host": "172.20.1.160", "relative_path": "/videos/1.mp4", "port": 8554, "channel": {}})";
     assert(a.toJSON() == s);
-    auto b = vtpl::utilities::UriDetails::fromJSON(s);
-    assert(b.scheme == "rtsp");
-    assert(b.host == "172.20.1.160");
-    assert(b.port == 8554);
-    assert(b.username == std::nullopt);
-    assert(b.password == std::nullopt);
-    assert(b.channel.site_id == std::nullopt);
-    assert(b.channel.channel_id == std::nullopt);
-    assert(b.channel.app_id == std::nullopt);
-    assert(b.channel.live_or_rec == std::nullopt);
-    assert(b.channel.stream_type == std::nullopt);
-    assert(b.channel.start_ts == std::nullopt);
-    assert(b.channel.media_type == std::nullopt);
-    assert(b.relative_path == "/videos/1.mp4");
-    assert(b.url == "rtsp://172.20.1.160:8554/videos/1.mp4");
   }
   {
     auto a = vtpl::utilities::parseUri("rtsp://admin:AdmiN1234@172.20.1.160:8554/videos/1.mp4");
@@ -342,6 +312,38 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.toString() == "#site=1#channel=2#app=0");
   }
 
+  {
+    auto a = vtpl::utilities::UriDetails();
+    assert(a.getComositeString().empty());
+  }
+  {
+    auto a = vtpl::utilities::UriDetails();
+    a.scheme = "rtsp";
+    a.host = "172.16.1.146";
+    a.port = 8554;
+    a.username = "admin";
+    a.password = "AdmiN@1234";
+    a.channel.site_id = 1;
+    a.channel.channel_id = 2;
+    a.channel.app_id = 0;
+    a.relative_path = "/videos/1.mp4";
+    assert(a.getComositeString() == "rtsp://admin:AdmiN%401234@172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0");
+    auto b = vtpl::utilities::parseUri("rtsp://admin:AdmiN%401234@172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0");
+    assert(b.scheme == "rtsp");
+    assert(b.host == "172.16.1.146");
+    assert(b.port == 8554);
+    assert(b.username == "admin");
+    assert(b.password == "AdmiN@1234");
+    assert(b.channel.site_id == 1);
+    assert(b.channel.channel_id == 2);
+    assert(b.channel.app_id == 0);
+    assert(b.channel.live_or_rec == std::nullopt);
+    assert(b.channel.stream_type == std::nullopt);
+    assert(b.channel.start_ts == std::nullopt);
+    assert(b.channel.media_type == std::nullopt);
+    assert(b.relative_path == "/videos/1.mp4");
+
+  }
   std::cout << "tests end\n";
   return 0;
 }

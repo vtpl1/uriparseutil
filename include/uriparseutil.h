@@ -43,6 +43,7 @@ public:
   Channel channel;
 
   std::string       toString();
+  std::string       getComositeString();
   static UriDetails fromString(std::string str);
   std::string       toJSON();
   // static UriDetails fromJSON(std::string jsonStr);
@@ -50,7 +51,7 @@ public:
 
 std::string URIPARSEUTIL_EXPORT normalizeUri(const std::string& uri);
 UriDetails URIPARSEUTIL_EXPORT  parseUri(const std::string& uri);
-// Channel URIPARSEUTIL_EXPORT     parseChannel(const std::string& channel);
+Channel URIPARSEUTIL_EXPORT     parseChannel(const std::string& channel);
 } // namespace utilities
 } // namespace vtpl
 #endif // uriparseutil_h

@@ -3,8 +3,7 @@
 # *****************************************************
 
 add_executable(tests_uriparseutil
-	# src/test.cpp
-	src/main1.cpp
+	src/test.cpp
 )
 
 target_link_libraries(tests_uriparseutil

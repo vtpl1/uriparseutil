@@ -7,6 +7,8 @@
 #include <cctype>
 #include <cstddef>
 #include <cstdint>
+#include <iomanip>
+#include <iostream>
 #include <limits>
 #include <optional>
 #include <sstream>
@@ -99,6 +101,44 @@ std::unordered_map<std::string, std::string> parseJson(const std::string& json_s
   return result;
 }
 
+std::string uriEncode(const std::string& value) {
+  std::ostringstream encoded;
+  encoded << std::hex << std::uppercase;
+
+  for (unsigned char c : value) {
+    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+      encoded << c;
+    } else {
+      encoded << '%' << std::setw(2) << std::setfill('0') << static_cast<int>(c);
+    }
+  }
+
+  return encoded.str();
+}
+std::string uriDecode(const std::string& value) {
+  std::ostringstream decoded;
+  size_t             len = value.length();
+
+  for (size_t i = 0; i < len; ++i) {
+    if (value[i] == '%' && i + 2 < len) {
+      int                hexValue;
+      std::istringstream hexStream(value.substr(i + 1, 2));
+      if (hexStream >> std::hex >> hexValue) {
+        decoded << static_cast<char>(hexValue);
+        i += 2;
+      } else {
+        decoded << '%';
+      }
+    } else if (value[i] == '+') {
+      decoded << ' ';
+    } else {
+      decoded << value[i];
+    }
+  }
+
+  return decoded.str();
+}
+
 } // namespace
 
 // rtsp://172.20.1.160:8554/videos/1.mp4
@@ -123,8 +163,8 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
   std::string uri = uri_in;
   if (v.size() >= 3) {
     uri                  = v[0];
-    uri_details.username = v[1];
-    uri_details.password = v[2];
+    uri_details.username = uriDecode(v[1]);
+    uri_details.password = uriDecode(v[2]);
   }
 
   std::string relative_path_and_fragment;
@@ -151,10 +191,10 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
       host_port_and_user_pass    = host_port_and_user_pass.substr(pos_at + 1);
       auto pos_colon             = userinfo.find(':');
       if (pos_colon != std::string::npos) {
-        uri_details.username = userinfo.substr(0, pos_colon);
-        uri_details.password = userinfo.substr(pos_colon + 1);
+        uri_details.username = uriDecode(userinfo.substr(0, pos_colon));
+        uri_details.password = uriDecode(userinfo.substr(pos_colon + 1));
       } else {
-        uri_details.username = userinfo;
+        uri_details.username = uriDecode(userinfo);
       }
     }
     auto pos_port = host_port_and_user_pass.rfind(':');
@@ -405,36 +445,36 @@ std::string vtpl::utilities::UriDetails::toJSON() {
   return oss.str();
 }
 
-vtpl::utilities::UriDetails vtpl::utilities::UriDetails::fromJSON(std::string jsonStr) {
-  auto data = parseJson(jsonStr);
+vtpl::utilities::Channel vtpl::utilities::parseChannel(const std::string& channel) {
+  return vtpl::utilities::Channel::fromString(channel);
+}
 
-  vtpl::utilities::UriDetails uri;
-  if (data.find("scheme") != data.end()) {
-    std::string s = data.at("scheme");
-    trim(s);
-    uri.scheme = s;
+std::string vtpl::utilities::UriDetails::getComositeString() {
+  std::stringstream ss;
+  if (!scheme.empty()) {
+    ss << scheme;
+    ss << "://";
+    if (username) {
+      ss << uriEncode(username.value());
+      if (password) {
+        ss << ':';
+        ss << uriEncode(password.value());
+      }
+      ss << '@';
+    }
   }
-  if (data.find("url") != data.end()) {
-    uri.url = data.at("url");
+  if (host) {
+    ss << host.value();
+    if (port) {
+      ss << ":" << port.value();
+    }
   }
-  if (data.find("host") != data.end()) {
-    uri.host = data.at("host");
+  if (relative_path) {
+    ss << relative_path.value();
   }
-  if (data.find("port") != data.end()) {
-    uri.port = std::stoul(data.at("port"));
+  if (!channel.toString().empty()) {
+    ss << channel.toString();
   }
-  if (data.find("username") != data.end()) {
-    uri.username = data.at("username");
-  }
-  if (data.find("password") != data.end()) {
-    uri.password = data.at("password");
-  }
-  if (data.find("relative_path") != data.end()) {
-    uri.relative_path = data.at("relative_path");
-  }
-  if (data.find("channel") != data.end()) {
-    uri.channel = vtpl::utilities::Channel::fromJSON(data.at("channel"));
-  }
-
-  return uri;
+  std::cout << "ddddddddd:" << ss.str() << std::endl;
+  return ss.str();
 }
