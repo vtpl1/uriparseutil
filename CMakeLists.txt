@@ -8,7 +8,7 @@ if(BUILD_JSON)
   list(APPEND VCPKG_MANIFEST_FEATURES "json")
 endif()
 
-set(VERSION 3.2.0)
+set(VERSION 4.0.0)
 
 project(uriparseutil
 	VERSION ${VERSION}
