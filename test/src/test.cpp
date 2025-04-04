@@ -317,18 +317,19 @@ int main(int argc, char const* argv[]) {
     assert(a.getComositeString().empty());
   }
   {
-    auto a = vtpl::utilities::UriDetails();
-    a.scheme = "rtsp";
-    a.host = "172.16.1.146";
-    a.port = 8554;
-    a.username = "admin";
-    a.password = "AdmiN@1234";
-    a.channel.site_id = 1;
+    auto a               = vtpl::utilities::UriDetails();
+    a.scheme             = "rtsp";
+    a.host               = "172.16.1.146";
+    a.port               = 8554;
+    a.username           = "admin";
+    a.password           = "AdmiN@1234";
+    a.channel.site_id    = 1;
     a.channel.channel_id = 2;
-    a.channel.app_id = 0;
-    a.relative_path = "/videos/1.mp4";
+    a.channel.app_id     = 0;
+    a.relative_path      = "/videos/1.mp4";
     assert(a.getComositeString() == "rtsp://admin:AdmiN%401234@172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0");
-    auto b = vtpl::utilities::parseUri("rtsp://admin:AdmiN%401234@172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0");
+    auto b =
+        vtpl::utilities::parseUri("rtsp://admin:AdmiN%401234@172.16.1.146:8554/videos/1.mp4#site=1#channel=2#app=0");
     assert(b.scheme == "rtsp");
     assert(b.host == "172.16.1.146");
     assert(b.port == 8554);
@@ -342,7 +343,31 @@ int main(int argc, char const* argv[]) {
     assert(b.channel.start_ts == std::nullopt);
     assert(b.channel.media_type == std::nullopt);
     assert(b.relative_path == "/videos/1.mp4");
+  }
+  {
+    auto b               = vtpl::utilities::UriDetails();
+    b.scheme             = "grpc";
+    b.host               = "172.16.1.146";
+    b.port               = 20006;
+    b.channel.site_id    = 1;
+    b.channel.channel_id = 2;
+    assert(b.getComositeString() == "grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2");
 
+    auto a = vtpl::utilities::parseUri("grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2");
+    assert(a.scheme == "grpcframe");
+    assert(a.host == "172.16.1.146");
+    assert(a.port == 20006);
+    assert(a.username == std::nullopt);
+    assert(a.password == std::nullopt);
+    assert(a.channel.site_id == 1);
+    assert(a.channel.channel_id == 2);
+    assert(a.channel.app_id == std::nullopt);
+    assert(a.channel.live_or_rec == std::nullopt);
+    assert(a.channel.stream_type == std::nullopt);
+    assert(a.channel.start_ts == std::nullopt);
+    assert(a.channel.media_type == std::nullopt);
+    assert(a.relative_path == "/site/1/channel/2");
+    assert(a.url == "grpcframe://172.16.1.146:20006/site/1/channel/2");
   }
   std::cout << "tests end\n";
   return 0;

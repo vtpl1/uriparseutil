@@ -8,7 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iomanip>
-#include <iostream>
+// #include <iostream>
 #include <limits>
 #include <optional>
 #include <sstream>
@@ -469,12 +469,42 @@ std::string vtpl::utilities::UriDetails::getComositeString() {
       ss << ":" << port.value();
     }
   }
+  if (relative_path.has_value() == false) {
+    if ((scheme.find("vms") == 0) || (scheme.find("grpc") == 0)) {
+      std::stringstream sss;
+      if (channel.site_id) {
+        sss << "/site/";
+        sss << channel.site_id.value();
+        if (channel.channel_id) {
+          sss << "/channel/";
+          sss << channel.channel_id.value();
+        }
+        if (!sss.str().empty()) {
+          relative_path = sss.str();
+        }
+      } else {
+        if (channel.channel_id) {
+          sss << '/';
+          sss << channel.channel_id.value();
+        }
+        if (channel.stream_type) {
+          sss << '/';
+          sss << channel.stream_type.value();
+        }
+        if (!sss.str().empty()) {
+          relative_path = sss.str();
+        }
+      }
+    }
+  }
+
   if (relative_path) {
     ss << relative_path.value();
   }
+
   if (!channel.toString().empty()) {
     ss << channel.toString();
   }
-  std::cout << "ddddddddd:" << ss.str() << std::endl;
+  // std::cout << "ddddddddd " << ss.str() << std::endl;
   return ss.str();
 }
