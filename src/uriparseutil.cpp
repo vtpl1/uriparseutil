@@ -178,31 +178,35 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
     relative_path_and_fragment = uri;
   } else {
     uri_details.scheme = uri.substr(0, pos_scheme);
-    auto pos_host      = pos_scheme + 3;
-    auto pos_path      = uri.find('/', pos_host);
+    relative_path_and_fragment = uri.substr(pos_scheme + 3);
+    if ((uri_details.scheme.find("vms") == 0) || (uri_details.scheme.find("grpc") == 0) ||
+        (uri_details.scheme.find("http") == 0) || (uri_details.scheme.find("rtsp") == 0)) {
+      auto pos_host = pos_scheme + 3;
+      auto pos_path = uri.find('/', pos_host);
 
-    std::string host_port_and_user_pass = uri.substr(pos_host, pos_path - pos_host);
+      std::string host_port_and_user_pass = uri.substr(pos_host, pos_path - pos_host);
 
-    relative_path_and_fragment = (pos_path != std::string::npos) ? uri.substr(pos_path) : "";
+      relative_path_and_fragment = (pos_path != std::string::npos) ? uri.substr(pos_path) : "";
 
-    auto pos_at = host_port_and_user_pass.rfind('@');
-    if (pos_at != std::string::npos) {
-      const std::string userinfo = host_port_and_user_pass.substr(0, pos_at);
-      host_port_and_user_pass    = host_port_and_user_pass.substr(pos_at + 1);
-      auto pos_colon             = userinfo.find(':');
-      if (pos_colon != std::string::npos) {
-        uri_details.username = uriDecode(userinfo.substr(0, pos_colon));
-        uri_details.password = uriDecode(userinfo.substr(pos_colon + 1));
-      } else {
-        uri_details.username = uriDecode(userinfo);
+      auto pos_at = host_port_and_user_pass.rfind('@');
+      if (pos_at != std::string::npos) {
+        const std::string userinfo = host_port_and_user_pass.substr(0, pos_at);
+        host_port_and_user_pass    = host_port_and_user_pass.substr(pos_at + 1);
+        auto pos_colon             = userinfo.find(':');
+        if (pos_colon != std::string::npos) {
+          uri_details.username = uriDecode(userinfo.substr(0, pos_colon));
+          uri_details.password = uriDecode(userinfo.substr(pos_colon + 1));
+        } else {
+          uri_details.username = uriDecode(userinfo);
+        }
       }
-    }
-    auto pos_port = host_port_and_user_pass.rfind(':');
-    if (pos_port != std::string::npos) {
-      uri_details.port = std::stoi(host_port_and_user_pass.substr(pos_port + 1));
-      uri_details.host = host_port_and_user_pass.substr(0, pos_port);
-    } else {
-      uri_details.host = host_port_and_user_pass;
+      auto pos_port = host_port_and_user_pass.rfind(':');
+      if (pos_port != std::string::npos) {
+        uri_details.port = std::stoi(host_port_and_user_pass.substr(pos_port + 1));
+        uri_details.host = host_port_and_user_pass.substr(0, pos_port);
+      } else {
+        uri_details.host = host_port_and_user_pass;
+      }
     }
   }
 

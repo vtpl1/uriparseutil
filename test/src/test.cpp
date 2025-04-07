@@ -257,6 +257,25 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.toString().empty() == true);
   }
   {
+    auto a = vtpl::utilities::parseUri("avf://videos/a.avf#site=1#channel=1");
+    assert(a.scheme == "avf");
+    assert(a.host == std::nullopt);
+    assert(a.port == std::nullopt);
+    assert(a.username == std::nullopt);
+    assert(a.password == std::nullopt);
+    assert(a.channel.site_id == 1);
+    assert(a.channel.channel_id == 1);
+    assert(a.channel.app_id == std::nullopt);
+    assert(a.channel.live_or_rec == std::nullopt);
+    assert(a.channel.stream_type == std::nullopt);
+    assert(a.channel.start_ts == std::nullopt);
+    assert(a.channel.media_type == std::nullopt);
+    // auto relative_path = path_p.toString();
+    assert(a.relative_path == "videos/a.avf");
+    assert(a.url == "avf://videos/a.avf");
+    assert(a.channel.toString() == "#site=1#channel=1");
+  }
+  {
     // const Poco::Path path_p(file);
     auto a = vtpl::utilities::parseUri(R"(C:\WorkFiles\thirdparty\videos\20250327_052532.avf)");
     assert(a.scheme == "avf");
