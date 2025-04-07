@@ -306,6 +306,9 @@ std::string vtpl::utilities::Channel::toString() {
   if (start_ts) {
     ss << "#timestamp=" << *start_ts;
   }
+  if (session_id) {
+    ss << "#session=" << *session_id;
+  }
   return ss.str();
 }
 
@@ -331,6 +334,8 @@ vtpl::utilities::Channel vtpl::utilities::Channel::fromString(std::string str) {
         ch.media_type = std::stoi(segment.substr(pos + 1));
       } else if (key == "timestamp") {
         ch.start_ts = std::stoull(segment.substr(pos + 1));
+      } else if (key == "session") {
+        ch.session_id = segment.substr(pos + 1);
       }
     }
   }
@@ -358,6 +363,7 @@ std::string vtpl::utilities::Channel::toJSON() const {
   add_field("stream_type", stream_type);
   add_field("media_type", media_type);
   add_field("start_ts", start_ts);
+  add_field("session_id", session_id);
 
   oss << "}";
   return oss.str();
@@ -387,7 +393,9 @@ vtpl::utilities::Channel vtpl::utilities::Channel::fromJSON(std::string jsonStr)
   if (data.find("start_ts") != data.end()) {
     channel.start_ts = std::stoull(data.at("start_ts"));
   }
-
+  if (data.find("session_id") != data.end()) {
+    channel.session_id = data.at("session_id");
+  }
   return channel;
 }
 

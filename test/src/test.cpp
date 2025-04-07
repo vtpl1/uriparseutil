@@ -370,9 +370,10 @@ int main(int argc, char const* argv[]) {
     b.port               = 20006;
     b.channel.site_id    = 1;
     b.channel.channel_id = 2;
-    assert(b.getComositeString() == "grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2");
+    b.channel.session_id = "abracadabra";
+    assert(b.getComositeString() == "grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2#session=abracadabra");
 
-    auto a = vtpl::utilities::parseUri("grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2");
+    auto a = vtpl::utilities::parseUri("grpc://172.16.1.146:20006/site/1/channel/2#site=1#channel=2#session=abracadabra");
     assert(a.scheme == "grpcframe");
     assert(a.host == "172.16.1.146");
     assert(a.port == 20006);
@@ -384,6 +385,7 @@ int main(int argc, char const* argv[]) {
     assert(a.channel.live_or_rec == std::nullopt);
     assert(a.channel.stream_type == std::nullopt);
     assert(a.channel.start_ts == std::nullopt);
+    assert(a.channel.session_id == "abracadabra");
     assert(a.channel.media_type == std::nullopt);
     assert(a.relative_path == "/site/1/channel/2");
     assert(a.url == "grpcframe://172.16.1.146:20006/site/1/channel/2");
