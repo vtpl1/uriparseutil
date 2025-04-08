@@ -177,7 +177,7 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
     }
     relative_path_and_fragment = uri;
   } else {
-    uri_details.scheme = uri.substr(0, pos_scheme);
+    uri_details.scheme         = uri.substr(0, pos_scheme);
     relative_path_and_fragment = uri.substr(pos_scheme + 3);
     if ((uri_details.scheme.find("vms") == 0) || (uri_details.scheme.find("grpc") == 0) ||
         (uri_details.scheme.find("http") == 0) || (uri_details.scheme.find("rtsp") == 0)) {
@@ -241,6 +241,10 @@ vtpl::utilities::UriDetails vtpl::utilities::parseUri(const std::string& uri_in)
             uri_details.channel.site_id = std::stoi(parts.at(i + 1));
           } else if (parts.at(i) == "channel") {
             uri_details.channel.channel_id = std::stoi(parts.at(i + 1));
+          } else if (parts.at(i) == "timestamp") {
+            uri_details.channel.start_ts = std::stoull(parts.at(i + 1));
+          } else if (parts.at(i) == "session") {
+            uri_details.channel.session_id = parts.at(i + 1);
           }
         }
       }
@@ -490,6 +494,14 @@ std::string vtpl::utilities::UriDetails::getComositeString() {
         if (channel.channel_id) {
           sss << "/channel/";
           sss << channel.channel_id.value();
+        }
+        if (channel.start_ts) {
+          sss << "/timestamp/";
+          sss << channel.start_ts.value();
+        }
+        if (channel.session_id) {
+          sss << "/session/";
+          sss << channel.session_id.value();
         }
         if (!sss.str().empty()) {
           relative_path = sss.str();
